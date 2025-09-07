@@ -81,7 +81,6 @@ func (mp *MessagePublisher) PublishEvent(queueName string, body interface{}) err
 			DeliveryMode: amqp091.Persistent,
 		},
 	)
-
 	if err != nil {
 		return err
 	}
