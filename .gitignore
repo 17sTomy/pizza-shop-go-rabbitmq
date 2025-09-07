@@ -1,0 +1,53 @@
+# -------- Go / Backend --------
+# Binaries
+/bin/
+/build/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependencies
+vendor/
+
+# IDE
+*.swp
+*.swo
+
+# -------- Node / Frontend --------
+# Dependencies
+frontend/node_modules/
+
+# Build
+frontend/dist/
+frontend/build/
+
+# Temps
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -------- Environments --------
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# -------- IDE / OS --------
+# JetBrains (WebStorm, GoLand, IntelliJ, etc.)
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
