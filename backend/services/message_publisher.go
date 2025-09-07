@@ -94,3 +94,10 @@ func (mp *MessagePublisher) PublishEvent(queueName string, body interface{}) err
 	logger.Log(fmt.Sprintf("channel closed: %v", &channel))
 	return nil
 }
+
+func GetMessagePublisherService() *MessagePublisher {
+	rabbitMqConf := config.GetNewRabbitMqConnection()
+	return &MessagePublisher{
+		conf: rabbitMqConf,
+	}
+}
