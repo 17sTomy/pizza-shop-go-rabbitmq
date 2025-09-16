@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/17sTomy/pizza-shop/config"
@@ -20,7 +19,6 @@ type IMessagePublisher interface {
 
 type MessagePublisher struct {
 	conf  *config.RabbitMqConnection
-	mutex sync.Mutex
 }
 
 func (mp *MessagePublisher) DeclareQueue(queueName string) error {
@@ -70,7 +68,8 @@ func (mp *MessagePublisher) PublishEvent(queueName string, body interface{}) err
 
 	logger.Log(fmt.Sprintf("created new channel....%v", &channel))
 
-	err = channel.PublishWithContext(ctx,
+	err = channel.PublishWithContext(
+		ctx,
 		"",
 		queueName,
 		false,
