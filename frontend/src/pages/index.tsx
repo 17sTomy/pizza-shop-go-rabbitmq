@@ -10,12 +10,9 @@ export default function IndexPage() {
         <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
           <div className="w-full max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Tabla de Pizzas - Ocupa 2 columnas */}
               <div className="lg:col-span-2">
                 <PizzaTable />
               </div>
-              
-              {/* La Cocina - Ocupa 1 columna */}
               <div className="lg:col-span-1">
                 <Kitchen />
               </div>
