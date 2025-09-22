@@ -14,19 +14,19 @@ import (
 )
 
 func main() {
-	app := gin.Default() 
+	app := gin.Default()
 
-  app.Use(gin.Recovery())
+	app.Use(gin.Recovery())
 
-  app.Use(middlewares.CorsMiddleware)
+	app.Use(middlewares.CorsMiddleware)
 
-  app.GET("/health", func(ctx *gin.Context) {
-    ctx.JSON(200, gin.H{
-      "status": "ok",
-    })
-  })
+	app.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
+			"status": "ok",
+		})
+	})
 
-  messagePublisher := services.GetMessagePublisherService()
+	messagePublisher := services.GetMessagePublisherService()
 	messageConsumer := services.GetMessageConsumerService()
 
 	websocketHandler := handlers.GetNewWebSocketHandler()
