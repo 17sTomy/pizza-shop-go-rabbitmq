@@ -1,5 +1,4 @@
 import { Chip } from '@heroui/react';
-import React from 'react';
 
 interface ConnectionStatusProps {
   isConnected: boolean;

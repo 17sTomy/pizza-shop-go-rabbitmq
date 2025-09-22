@@ -1,10 +1,11 @@
-import { FC, useState, useEffect } from "react";
+import { useState, useEffect, type FC } from "react";
 import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { SwitchProps, useSwitch } from "@heroui/switch";
+import { useSwitch, type SwitchProps } from "@heroui/switch";
 import clsx from "clsx";
 import { useTheme } from "@heroui/use-theme";
+import { MoonFilledIcon, SunFilledIcon } from "./icons";
 
-import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
+
 
 export interface ThemeSwitchProps {
   className?: string;
