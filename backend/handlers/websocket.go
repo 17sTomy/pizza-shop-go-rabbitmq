@@ -12,7 +12,7 @@ import (
 
 type IWebSocketHandler interface {
 	HandleConnection(ctx *gin.Context)
-  GetConnectionMap() *map[string]services.IWebsocketConnection
+	GetConnectionMap() *map[string]services.IWebsocketConnection
 }
 
 type WebSocketHandler struct {
@@ -29,7 +29,7 @@ func (h *WebSocketHandler) HandleConnection(ctx *gin.Context) {
 	}
 	defer conn.Close()
 
-	conn.WriteMessage(websocket.TextMessage, []byte("Started taking order"))
+	conn.WriteMessage(websocket.TextMessage, []byte("{\"type\":\"connected\"}"))
 
 	connection := services.NewWebSocketConnection(conn)
 	h.addConnection("pizza", connection)

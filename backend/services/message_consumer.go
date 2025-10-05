@@ -62,7 +62,7 @@ func (mcs *MessageConsumer) ConsumeEventAndProcess(queueName string, processor I
 	go func() {
 		for msg := range messages {
 			go func(msg amqp091.Delivery) {
-				err := processor.ProcessMessage(msg.Body)
+				err := processor.ProcessMessage(msg)
 				if err != nil {
 					logger.Log(fmt.Sprintf("Message processing failed: %v", err))
 				}

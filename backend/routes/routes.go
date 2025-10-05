@@ -18,8 +18,8 @@ func RegisterRoutes(
 		RegisterWebSocketRoutes(wsr, websocketHandler)
 	}
 
-  or := router.Group("/orders")
-  {
-    RegisterOrderRoutes(or, messagePublisher)
-  }
+	or := router.Group("/orders")
+	{
+		RegisterOrderRoutes(or, messagePublisher)
+	}
 }

@@ -8,12 +8,11 @@ import (
 
 	"github.com/17sTomy/pizza-shop/constants"
 	"github.com/17sTomy/pizza-shop/logger"
-	"github.com/17sTomy/pizza-shop/utils"
 	"github.com/rabbitmq/amqp091-go"
 )
 
 type IMessageProcessor interface {
-	ProcessMessage(message interface{}) error
+	ProcessMessage(message any) error
 }
 
 type MessageProcessor struct {
@@ -22,9 +21,9 @@ type MessageProcessor struct {
 	mutex      sync.RWMutex
 }
 
-func (mp *MessageProcessor) ProcessMessage(message interface{}) error {
+func (mp *MessageProcessor) ProcessMessage(message any) error {
 	msg := message.(amqp091.Delivery)
-	var event map[string]interface{}
+	var event map[string]any
 	var err error
 	if err = json.Unmarshal(msg.Body, &event); err != nil {
 		logger.Log(fmt.Sprintf("Failed to unmarshal message : %v", err))
@@ -64,9 +63,30 @@ func (mp *MessageProcessor) ProcessMessage(message interface{}) error {
 	return nil
 }
 
-func (mp *MessageProcessor) handleOrderOrdered(event map[string]interface{}) error {
+func (mp *MessageProcessor) sendWS(payload map[string]any) error {
+	if mp.connection == nil {
+		return nil
+	}
+	bytes, _ := json.Marshal(payload)
+	mp.mutex.Lock()
+	defer mp.mutex.Unlock()
+	conn := (*mp.connection)["pizza"]
+	if conn != nil {
+		return conn.SendMessage(bytes)
+	}
+	return nil
+}
+
+func (mp *MessageProcessor) handleOrderOrdered(event map[string]any) error {
 	var err error
 	logger.Log(fmt.Sprintf("order %v accepted", event))
+	_ = mp.sendWS(map[string]any{
+		"type": "new_order",
+		"data": map[string]any{
+			"pizzaId":  event["pizza_id"],
+			"quantity": event["quantity"],
+		},
+	})
 	event["order_status"] = constants.ORDER_PREPARING
 	err = mp.publisher.PublishEvent(constants.KITCHEN_ORDER_QUEUE, event)
 	if err != nil {
@@ -88,13 +108,23 @@ func (mp *MessageProcessor) handleOrderOrdered(event map[string]interface{}) err
 	return err
 }
 
-func (mp *MessageProcessor) handleOrderPreparing(event map[string]interface{}) error {
+func (mp *MessageProcessor) handleOrderPreparing(event map[string]any) error {
 	var err error
 	logger.Log(fmt.Sprintf("order %v accepted", event))
 
 	event["order_status"] = constants.ORDER_PREPARED
-	time.Sleep(utils.GenerateRandomDuration(1, 6))
-	
+	pizzaID := event["pizza_id"]
+	for p := 5; p <= 95; p += 5 {
+		_ = mp.sendWS(map[string]any{
+			"type": "pizza_status_update",
+			"data": map[string]any{
+				"pizzaId":  pizzaID,
+				"progress": p,
+			},
+		})
+		time.Sleep(300 * time.Millisecond)
+	}
+
 	err = mp.publisher.PublishEvent(constants.KITCHEN_ORDER_QUEUE, event)
 	if err != nil {
 		logger.Log(fmt.Sprintf("error: %v, event: %v", err, event))
@@ -115,20 +145,22 @@ func (mp *MessageProcessor) handleOrderPreparing(event map[string]interface{}) e
 			}
 		}
 	}
-	
+
 	return err
 }
 
-func (mp *MessageProcessor) handleOrderPrepared(event map[string]interface{}) error {
+func (mp *MessageProcessor) handleOrderPrepared(event map[string]any) error {
 	var err error
 
 	logger.Log(fmt.Sprintf("order %v prepared successfully", event["order_no"]))
 	event["order_status"] = constants.ORDER_DELIVERED
 	logger.Log(fmt.Sprintf("error: %v, event: %v", err, event))
 
-	message := map[string]interface{}{
-		"message": constants.ORDER_PREPARED_SUCCESSFULLY,
-		"order":   event,
+	message := map[string]any{
+		"type": "pizza_ready",
+		"data": map[string]any{
+			"pizzaId": event["pizza_id"],
+		},
 	}
 
 	messagesBytes, _ := json.Marshal(message)
