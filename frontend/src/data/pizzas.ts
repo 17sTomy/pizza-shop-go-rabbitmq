@@ -13,7 +13,7 @@ export const pizzas: Pizza[] = [
     id: '2',
     name: 'Pepperoni',
     ingredients: 'Tomate, mozzarella, pepperoni, orégano',
-    status: 'COOKING',
+    status: 'ORDERING',
     photo: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=100&h=100&fit=crop&crop=center',
     price: 15.99
   },
@@ -22,7 +22,7 @@ export const pizzas: Pizza[] = [
     name: 'Hawaiana',
     ingredients: 'Tomate, mozzarella, jamón, piña',
     status: 'ORDERING',
-    photo: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=100&h=100&fit=crop&crop=center',
+    photo: 'https://images.unsplash.com/photo-1751026044631-2aa676914b1b?w=100&h=100&fit=crop&crop=center',
     price: 16.99
   },
   {

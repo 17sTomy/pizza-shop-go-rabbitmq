@@ -8,37 +8,41 @@ import {
   Progress
 } from '@heroui/react';
 import type { Pizza } from '../types/pizza';
+import { pizzas as catalog } from '../data/pizzas';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 interface KitchenPizza extends Pizza {
   orderTime: Date;
-  estimatedTime: number; // in minutes
-  progress: number; // 0-100
+  estimatedTime: number;
+  progress: number;
 }
 
 const Kitchen: React.FC = () => {
   const [kitchenPizzas, setKitchenPizzas] = useState<KitchenPizza[]>([]);
   
-  // Usar el contexto de websocket
   const { lastMessage } = useWebSocketContext();
 
-  // Manejar mensajes del websocket
   useEffect(() => {
     if (lastMessage) {
       switch (lastMessage.type) {
         case 'new_order':
-          // Agregar nueva pizza a la cocina
-          const newPizza: KitchenPizza = {
-            ...lastMessage.data,
-            orderTime: new Date(),
-            estimatedTime: 15, // Tiempo estimado por defecto
-            progress: 0
-          };
-          setKitchenPizzas(prev => [...prev, newPizza]);
+          {
+            const pizzaId = lastMessage.data.pizzaId as string;
+            const found = catalog.find(p => p.id === pizzaId);
+            if (found) {
+              const newPizza: KitchenPizza = {
+                ...found,
+                status: 'COOKING',
+                orderTime: new Date(),
+                estimatedTime: 15,
+                progress: 0
+              };
+              setKitchenPizzas(prev => [...prev, newPizza]);
+            }
+          }
           break;
           
         case 'pizza_status_update':
-          // Actualizar progreso de una pizza
           setKitchenPizzas(prev => 
             prev.map(pizza => 
               pizza.id === lastMessage.data.pizzaId 
@@ -49,7 +53,6 @@ const Kitchen: React.FC = () => {
           break;
           
         case 'pizza_ready':
-          // Remover pizza de la cocina cuando esté lista
           setKitchenPizzas(prev => 
             prev.filter(pizza => pizza.id !== lastMessage.data.pizzaId)
           );
@@ -58,27 +61,8 @@ const Kitchen: React.FC = () => {
     }
   }, [lastMessage]);
 
-  // Simular pizzas en la cocina para demo (esto se reemplazará con websockets reales)
-  useEffect(() => {
-    const mockKitchenPizzas: KitchenPizza[] = [
-      {
-        id: '2',
-        name: 'Pepperoni',
-        ingredients: 'Tomate, mozzarella, pepperoni, orégano',
-        status: 'COOKING',
-        photo: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=100&h=100&fit=crop&crop=center',
-        price: 15.99,
-        orderTime: new Date(Date.now() - 5 * 60000), // 5 minutos atrás
-        estimatedTime: 15,
-        progress: 60
-      }
-    ];
-
-    setKitchenPizzas(mockKitchenPizzas);
-  }, []);
-
   const getTimeRemaining = (orderTime: Date, estimatedTime: number) => {
-    const elapsed = (Date.now() - orderTime.getTime()) / 60000; // en minutos
+    const elapsed = (Date.now() - orderTime.getTime()) / 60000;
     const remaining = Math.max(0, estimatedTime - elapsed);
     return Math.ceil(remaining);
   };
@@ -148,8 +132,7 @@ const Kitchen: React.FC = () => {
                           size="sm"
                         />
                         
-                        <div className="flex justify-between text-tiny text-default-500">
-                          <span>Tiempo estimado: {pizza.estimatedTime} min</span>
+                        <div className="flex justify-end text-tiny text-default-500">
                           <span>
                             Restante: {getTimeRemaining(pizza.orderTime, pizza.estimatedTime)} min
                           </span>

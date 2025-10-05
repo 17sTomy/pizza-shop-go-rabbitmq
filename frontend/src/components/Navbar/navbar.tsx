@@ -1,5 +1,4 @@
 import { Link } from "@heroui/link";
-import { Chip } from "@heroui/chip";
 import {
   Navbar as HeroUINavbar,
   NavbarBrand,
@@ -7,8 +6,9 @@ import {
   NavbarItem,
 } from "@heroui/navbar";
 
+import { useWebSocketContext } from "../../contexts/WebSocketContext";
 import { ThemeSwitch } from "./theme-switch";
-import { useWebSocketContext } from "../contexts/WebSocketContext";
+import { ConnectionStatus } from "./ConnectionStatus";
 
 export const Navbar = () => {
   const { isConnected } = useWebSocketContext();
@@ -24,13 +24,7 @@ export const Navbar = () => {
           >
             <span className="text-2xl">🍕</span>
             <p className="font-bold text-inherit text-xl">Pizza Shop</p>
-            <Chip
-              color={isConnected ? "success" : "danger"}
-              size="sm"
-              variant="dot"
-            >
-              {isConnected ? "Conectado" : "Desconectado"}
-            </Chip>
+            <ConnectionStatus isConnected={isConnected} />
           </Link>
         </NavbarBrand>
       </NavbarContent>
@@ -43,3 +37,5 @@ export const Navbar = () => {
     </HeroUINavbar>
   );
 };
+
+

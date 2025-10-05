@@ -1,3 +1,4 @@
+import { useToast } from './Utils/ToastProvider';
 import React, { useState } from 'react';
 import {
   Table,
@@ -14,9 +15,12 @@ import {
 } from '@heroui/react';
 import { pizzas } from '../data/pizzas';
 import type { Pizza } from '../types/pizza';
+import { createOrder } from '../services/service';
+import { pizzas as catalog } from '../data/pizzas';
 
 const PizzaTable: React.FC = () => {
   const [orders, setOrders] = useState<Record<string, number>>({});
+  const { showToast } = useToast();
 
   const getStatusColor = (status: Pizza['status']) => {
     switch (status) {
@@ -61,14 +65,38 @@ const PizzaTable: React.FC = () => {
     });
   };
 
-  const handleOrder = (pizzaId: string) => {
-    const quantity = orders[pizzaId] || 0;
-    if (quantity > 0) {
-      // Aquí puedes agregar la lógica para procesar la orden
-      console.log(`Ordenando ${quantity} pizza(s) con ID: ${pizzaId}`);
-      // Por ahora solo mostramos un alert
-      alert(`¡Orden realizada! ${quantity} pizza(s) agregada(s) al carrito.`);
+  const handleOrderAll = async () => {
+    const entries = Object.entries(orders).filter(([, qty]) => qty > 0);
+    if (entries.length === 0) return;
+
+    const results = await Promise.allSettled(
+      entries.map(([pizzaId, quantity]) => createOrder({ pizza_id: pizzaId, quantity }))
+    );
+
+    const success = results.filter(r => r.status === 'fulfilled').length;
+    const fail = results.length - success;
+    if (success > 0) {
+      showToast(`¡${success} orden(es) enviada(s) a la cocina!`, 'success');
     }
+    if (fail > 0) {
+      showToast(`${fail} orden(es) fallaron`, 'error');
+    }
+
+    const items = entries.map(([pizzaId, qty]) => {
+      const p = catalog.find(x => x.id === pizzaId);
+      const price = p ? p.price : 0;
+      const name = p ? p.name : pizzaId;
+      const subtotal = price * Number(qty);
+      return { name, quantity: Number(qty), subtotal };
+    });
+    const total = items.reduce((acc, it) => acc + it.subtotal, 0);
+    window.dispatchEvent(new CustomEvent('order:submitted', { detail: { items, total } }));
+
+    setOrders(prev => {
+      const next = { ...prev } as Record<string, number>;
+      for (const [pizzaId] of entries) next[pizzaId] = 0;
+      return next;
+    });
   };
 
   return (
@@ -139,20 +167,22 @@ const PizzaTable: React.FC = () => {
                     >
                       +
                     </Button>
-                    <Button
-                      color="primary"
-                      size="sm"
-                      onPress={() => handleOrder(pizza.id)}
-                      isDisabled={!orders[pizza.id] || orders[pizza.id] <= 0 || pizza.status === 'INACTIVE'}
-                    >
-                      Ordenar
-                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        <div className="flex justify-end mt-4">
+          <Button
+            color="primary"
+            size="sm"
+            isDisabled={Object.values(orders).every(q => !q || q <= 0)}
+            onPress={handleOrderAll}
+          >
+            Order
+          </Button>
+        </div>
       </CardBody>
     </Card>
   );

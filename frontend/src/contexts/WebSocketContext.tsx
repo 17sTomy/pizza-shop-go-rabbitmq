@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { siteConfig } from '../config/site';
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -14,7 +15,7 @@ interface WebSocketProviderProps {
 }
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
-  const { isConnected, sendMessage, lastMessage } = useWebSocket('ws://localhost:8080/api/ws/');
+  const { isConnected, sendMessage, lastMessage } = useWebSocket(siteConfig.wsUrl);
 
   return (
     <WebSocketContext.Provider value={{ isConnected, sendMessage, lastMessage }}>

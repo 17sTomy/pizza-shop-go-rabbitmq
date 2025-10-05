@@ -3,7 +3,7 @@ import { VisuallyHidden } from "@react-aria/visually-hidden";
 import { useSwitch, type SwitchProps } from "@heroui/switch";
 import clsx from "clsx";
 import { useTheme } from "@heroui/use-theme";
-import { MoonFilledIcon, SunFilledIcon } from "./icons";
+import { MoonFilledIcon, SunFilledIcon } from "../Utils/icons";
 
 
 

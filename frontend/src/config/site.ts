@@ -1,8 +1,10 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Vite + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Pizza Shop",
+  description: "Pizza Shop",
+  apiBaseUrl: "http://localhost:8661/api",
+  wsUrl: "ws://localhost:8661/api/ws/",
   navItems: [
     {
       label: "Home",
@@ -59,11 +61,4 @@ export const siteConfig = {
       href: "/logout",
     },
   ],
-  links: {
-    github: "https://github.com/heroui-inc/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
-  },
 };
